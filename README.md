@@ -9,3 +9,8 @@ $ source activate bl-magi
 ``` 
 $ source deactivate bl-magi
 ```
+
+### Conda setting:
+``` 
+$ conda env create -f conda/environment_{machine}.yml
+```
