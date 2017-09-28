@@ -1,9 +1,10 @@
 #! /bin/bash
 
 source activate bl-magi
-export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+export PYTHONPATH=$PYTHONPATH:`pwd`/../../tensorflow:`pwd`/../../slim
+export MODEL_BASE_PATH='gs://bluelens-style-model/object_detection'
 
-python ./object_detection/train.py \
+python ./train.py \
     --logtostderr \
-    --pipeline_config_path=./ssd_inception_v2_ppl.config \
-    --train_dir=/dataset/models/model/train
+    --pipeline_config_path=$MODEL_BASE_PATH/data/faster_rcnn_resnet152.config \
+    --train_dir=$MODEL_BASE_PATH/models/model/train

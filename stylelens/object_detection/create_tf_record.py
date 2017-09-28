@@ -145,13 +145,17 @@ def dict_to_tf_example(data,
 def main(_):
   if FLAGS.set not in SETS:
     raise ValueError('set must be in : {}'.format(SETS))
-  if FLAGS.folder not in FOLDERS:
-    raise ValueError('folder must be in : {}'.format(FOLDERS))
+  # if FLAGS.folder not in FOLDERS:
+  #   raise ValueError('folder must be in : {}'.format(FOLDERS))
 
   data_dir = FLAGS.data_dir
-  folders = ['VOC2007', 'VOC2012']
-  if FLAGS.folder != 'merged':
+  # folders = ['VOC2007', 'VOC2012']
+
+  if FLAGS.folder == 'merged':
+    print('')
+  else:
     folders = [FLAGS.folder]
+
 
   writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
 
@@ -163,6 +167,8 @@ def main(_):
                                  'aeroplane_' + FLAGS.set + '.txt')
     annotations_dir = os.path.join(data_dir, folder, FLAGS.annotations_dir)
     examples_list = dataset_util.read_examples_list(examples_path)
+    for idx, example in enumerate(examples_list):
+      print(idx)
       if idx % 100 == 0:
         logging.info('On image %d of %d', idx, len(examples_list))
       path = os.path.join(annotations_dir, example + '.xml')
@@ -175,7 +181,8 @@ def main(_):
                                       FLAGS.ignore_difficult_instances)
       writer.write(tf_example.SerializeToString())
 
-  writer.close()
+  ret = writer.close()
+  print(ret)
 
 
 if __name__ == '__main__':
