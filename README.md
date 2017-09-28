@@ -14,3 +14,9 @@ $ source deactivate bl-magi
 ``` 
 $ conda env create -f conda/environment_{machine}.yml
 ```
+
+### Add Libraries to PYTHONPATH
+``` 
+# on the top directory
+$ export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/tensorflow/slim
+``` 
