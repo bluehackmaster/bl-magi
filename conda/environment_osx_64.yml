@@ -1,0 +1,5 @@
+name: bl-magi
+channels:
+- defaults
+prefix: /Users/bok95/anaconda/envs/bl-magi
+
