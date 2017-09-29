@@ -33,6 +33,9 @@ from lxml import etree
 import PIL.Image
 import tensorflow as tf
 
+from os import listdir
+from os.path import isdir, isfile, join
+
 from object_detection.utils import dataset_util
 from object_detection.utils import label_map_util
 
@@ -43,7 +46,7 @@ flags.DEFINE_string('set', 'train', 'Convert training set, validation set or '
                     'merged set.')
 flags.DEFINE_string('annotations_dir', 'Annotations',
                     '(Relative) path to annotations directory.')
-flags.DEFINE_string('folder', 'VOC2007', 'Desired challenge folder.')
+flags.DEFINE_string('folder', 'merged', 'Desired challenge folder.')
 flags.DEFINE_string('output_path', '', 'Path to output TFRecord')
 flags.DEFINE_string('label_map_path', 'data/pascal_label_map.pbtxt',
                     'Path to label map proto')
@@ -141,21 +144,22 @@ def dict_to_tf_example(data,
   }))
   return example
 
+def get_folders(dataset_directory):
+  dirs = listdir(dataset_directory)
+  return [f for f in listdir(dataset_directory) if isdir(join(dataset_directory, f))]
 
 def main(_):
   if FLAGS.set not in SETS:
     raise ValueError('set must be in : {}'.format(SETS))
-  # if FLAGS.folder not in FOLDERS:
-  #   raise ValueError('folder must be in : {}'.format(FOLDERS))
 
   data_dir = FLAGS.data_dir
-  # folders = ['VOC2007', 'VOC2012']
+  folders = get_folders(data_dir)
 
-  if FLAGS.folder == 'merged':
-    print('')
-  else:
+
+  if FLAGS.folder != 'merged':
+    if FLAGS.folder not in folders:
+      raise ValueError('folder must be in : {}'.format(folders))
     folders = [FLAGS.folder]
-
 
   writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
 
