@@ -17,7 +17,7 @@ r"""Convert raw PASCAL dataset to TFRecord for object_detection.
 
 Example usage:
     ./create_pascal_tf_record --data_dir=/home/user/VOCdevkit \
-        --folder=VOC2012 \
+        --folder=merged \
         --output_path=/home/user/pascal.record
 """
 from __future__ import absolute_import
@@ -55,8 +55,6 @@ flags.DEFINE_boolean('ignore_difficult_instances', False, 'Whether to ignore '
 FLAGS = flags.FLAGS
 
 SETS = ['train', 'val', 'trainval', 'test']
-FOLDERS = ['VOC2007', 'VOC2012', 'merged']
-
 
 def dict_to_tf_example(data,
                        dataset_directory,
@@ -145,7 +143,6 @@ def dict_to_tf_example(data,
   return example
 
 def get_folders(dataset_directory):
-  dirs = listdir(dataset_directory)
   return [f for f in listdir(dataset_directory) if isdir(join(dataset_directory, f))]
 
 def main(_):
@@ -154,7 +151,6 @@ def main(_):
 
   data_dir = FLAGS.data_dir
   folders = get_folders(data_dir)
-
 
   if FLAGS.folder != 'merged':
     if FLAGS.folder not in folders:
@@ -166,28 +162,26 @@ def main(_):
   label_map_dict = label_map_util.get_label_map_dict(FLAGS.label_map_path)
 
   for folder in folders:
-    logging.info('Reading from PASCAL %s dataset.', folder)
-    examples_path = os.path.join(data_dir, folder, 'ImageSets', 'Main',
-                                 'aeroplane_' + FLAGS.set + '.txt')
+    logging.info('Reading from %s dataset.', folder)
+    data_path = os.path.join(data_dir, folder, 'ImageSets', 'Main',
+                                  FLAGS.set + '.txt')
     annotations_dir = os.path.join(data_dir, folder, FLAGS.annotations_dir)
-    examples_list = dataset_util.read_examples_list(examples_path)
-    for idx, example in enumerate(examples_list):
+    data_list = dataset_util.read_examples_list(data_path)
+    for idx, data_item in enumerate(data_list):
       print(idx)
       if idx % 100 == 0:
-        logging.info('On image %d of %d', idx, len(examples_list))
-      path = os.path.join(annotations_dir, example + '.xml')
+        logging.info('On image %d of %d', idx, len(data_list))
+      path = os.path.join(annotations_dir, data_item + '.xml')
       with tf.gfile.GFile(path, 'r') as fid:
         xml_str = fid.read()
       xml = etree.fromstring(xml_str)
       data = dataset_util.recursive_parse_xml_to_dict(xml)['annotation']
 
-      tf_example = dict_to_tf_example(data, FLAGS.data_dir, label_map_dict,
+      tf_data = dict_to_tf_example(data, FLAGS.data_dir, label_map_dict,
                                       FLAGS.ignore_difficult_instances)
-      writer.write(tf_example.SerializeToString())
+      writer.write(tf_data.SerializeToString())
 
-  ret = writer.close()
-  print(ret)
-
+  writer.close()
 
 if __name__ == '__main__':
   tf.app.run()
