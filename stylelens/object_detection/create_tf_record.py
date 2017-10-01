@@ -28,6 +28,7 @@ import hashlib
 import io
 import logging
 import os
+import re
 
 from lxml import etree
 import PIL.Image
@@ -171,7 +172,7 @@ def main(_):
       print(idx)
       if idx % 100 == 0:
         logging.info('On image %d of %d', idx, len(data_list))
-      path = os.path.join(annotations_dir, data_item + '.xml')
+      path = os.path.join(annotations_dir, re.sub('\.jpg$', '', data_item) + '.xml')
       with tf.gfile.GFile(path, 'r') as fid:
         xml_str = fid.read()
       xml = etree.fromstring(xml_str)
