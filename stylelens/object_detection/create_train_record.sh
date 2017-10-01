@@ -6,5 +6,5 @@ export MODEL_BASE_PATH='gs://bluelens-style-model/object_detection'
 
 python create_tf_record.py \
     --label_map_path=$MODEL_BASE_PATH/data/label_map.pbtxt \
-    --data_dir=/dataset/VOCdevkit --folder=VOC2012 --set=train \
+    --data_dir=/dataset/deepfashion --folder=dataset --set=train \
     --output_path=$MODEL_BASE_PATH/data/train.record
