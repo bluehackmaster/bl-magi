@@ -45,6 +45,7 @@ Example usage:
 """
 import functools
 import tensorflow as tf
+import os
 
 from google.protobuf import text_format
 from object_detection import evaluator
@@ -78,6 +79,7 @@ flags.DEFINE_string('model_config_path', '',
 
 FLAGS = flags.FLAGS
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 def get_configs_from_pipeline_file():
   """Reads evaluation configuration from a pipeline_pb2.TrainEvalPipelineConfig.
@@ -101,7 +103,6 @@ def get_configs_from_pipeline_file():
   input_config = pipeline_config.eval_input_reader
 
   return model_config, eval_config, input_config
-
 
 def get_configs_from_multiple_files():
   """Reads evaluation configuration from multiple config files.
@@ -130,7 +131,6 @@ def get_configs_from_multiple_files():
 
   return model_config, eval_config, input_config
 
-
 def main(unused_argv):
   assert FLAGS.checkpoint_dir, '`checkpoint_dir` is missing.'
   assert FLAGS.eval_dir, '`eval_dir` is missing.'
@@ -155,7 +155,6 @@ def main(unused_argv):
 
   evaluator.evaluate(create_input_dict_fn, model_fn, eval_config, categories,
                      FLAGS.checkpoint_dir, FLAGS.eval_dir)
-
 
 if __name__ == '__main__':
   tf.app.run()
