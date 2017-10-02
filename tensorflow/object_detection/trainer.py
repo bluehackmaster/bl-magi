@@ -34,7 +34,6 @@ from deployment import model_deploy
 
 slim = tf.contrib.slim
 
-
 def _create_input_queue(batch_size_per_clone, create_tensor_dict_fn,
                         batch_queue_capacity, num_batch_queue_threads,
                         prefetch_queue_capacity, data_augmentation_options):
@@ -77,7 +76,6 @@ def _create_input_queue(batch_size_per_clone, create_tensor_dict_fn,
       prefetch_queue_capacity=prefetch_queue_capacity)
   return input_queue
 
-
 def _get_inputs(input_queue, num_classes):
   """Dequeue batch and construct inputs to object detection model.
 
@@ -108,7 +106,6 @@ def _get_inputs(input_queue, num_classes):
     return image, location_gt, classes_gt, masks_gt
   return zip(*map(extract_images_and_targets, read_data_list))
 
-
 def _create_losses(input_queue, create_model_fn):
   """Creates loss function for a DetectionModel.
 
@@ -133,7 +130,6 @@ def _create_losses(input_queue, create_model_fn):
   losses_dict = detection_model.loss(prediction_dict)
   for loss_tensor in losses_dict.values():
     tf.losses.add_loss(loss_tensor)
-
 
 def train(create_tensor_dict_fn, create_model_fn, train_config, master, task,
           num_clones, worker_replicas, clone_on_cpu, ps_tasks, worker_job_name,
@@ -274,6 +270,9 @@ def train(create_tensor_dict_fn, create_model_fn, train_config, master, task,
     # Soft placement allows placing on CPU ops without GPU implementation.
     session_config = tf.ConfigProto(allow_soft_placement=True,
                                     log_device_placement=False)
+
+    session_config.gpu_options.allow_growth = True
+    #session_config.gpu_options.per_process_gpu_memory_fraction = 0.2
 
     # Save checkpoints regularly.
     keep_checkpoint_every_n_hours = train_config.keep_checkpoint_every_n_hours
