@@ -239,3 +239,6 @@ crashlytics-build.properties
 fabric.properties
 
 nohup.out
+
+*.pb
+*.pbtxt
