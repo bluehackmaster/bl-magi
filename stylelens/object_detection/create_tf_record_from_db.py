@@ -1,18 +1,3 @@
-# Copyright 2017 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-
 r"""Convert raw PASCAL dataset to TFRecord for object_detection.
 
 Example usage:
@@ -39,6 +24,9 @@ from os.path import isdir, isfile, join
 
 from object_detection.utils import dataset_util
 from object_detection.utils import label_map_util
+
+from stylelens_dataset.images import Images
+from stylelens_dataset.objects import Objects
 
 
 flags = tf.app.flags
@@ -147,40 +135,27 @@ def get_folders(dataset_directory):
   return [f for f in listdir(dataset_directory) if isdir(join(dataset_directory, f))]
 
 def main(_):
-  if FLAGS.set not in SETS:
-    raise ValueError('set must be in : {}'.format(SETS))
-
-  data_dir = FLAGS.data_dir
-  folders = get_folders(data_dir)
-
-  if FLAGS.folder != 'merged':
-    if FLAGS.folder not in folders:
-      raise ValueError('folder must be in : {}'.format(folders))
-    folders = [FLAGS.folder]
-
+  dataset_api = Images()
   writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
 
-  label_map_dict = label_map_util.get_label_map_dict(FLAGS.label_map_path)
+  offset = 0
+  limit = 50
 
-  for folder in folders:
-    logging.info('Reading from %s dataset.', folder)
-    data_path = os.path.join(data_dir, folder, 'ImageSets', 'Main',
-                                  FLAGS.set + '.txt')
-    annotations_dir = os.path.join(data_dir, folder, FLAGS.annotations_dir)
-    data_list = dataset_util.read_examples_list(data_path)
-    for idx, data_item in enumerate(data_list):
-      print(idx)
-      if idx % 100 == 0:
-        logging.info('On image %d of %d', idx, len(data_list))
-      path = os.path.join(annotations_dir, re.sub('\.jpg$', '', data_item) + '.xml')
-      with tf.gfile.GFile(path, 'r') as fid:
-        xml_str = fid.read()
-      xml = etree.fromstring(xml_str)
-      data = dataset_util.recursive_parse_xml_to_dict(xml)['annotation']
+  while True:
+    try:
+      res = dataset_api.get_images_by_source("deepfashion", offset=offset, limit=limit)
 
-      tf_data = dict_to_tf_example(data, FLAGS.data_dir, label_map_dict,
-                                      FLAGS.ignore_difficult_instances)
-      writer.write(tf_data.SerializeToString())
+      for image in res:
+        tf_data = dict_to_tf_example(image)
+        writer.write(tf_data.SerializeToString())
+
+      if limit > len(res):
+        print("done")
+        break
+      else:
+        offset = offset + len(res)
+    except Exception as e:
+      print(str(e))
 
   writer.close()
 
