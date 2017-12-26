@@ -2,6 +2,7 @@ import os
 from bson.objectid import ObjectId
 from stylelens_dataset.images import Images
 from util import s3
+from PIL import Image
 
 CATEGORY_CLOTH_FILE = './list_category_cloth.txt'
 CATEGORY_IMG_FILE = './list_category_img.txt'
@@ -105,6 +106,10 @@ def upload_image_to_storage(id, img_file):
   file_url = storage.upload_file_to_bucket(AWS_BUCKET, file, key, is_public=is_public)
   return file_url
 
+def get_image_size(img_file):
+  with Image.open(img_file) as img:
+    return img.size
+
 if __name__ == '__main__':
   print('start')
 
@@ -121,6 +126,10 @@ if __name__ == '__main__':
   for img in attribute_images:
     image = {}
     image['file'] = img['file']
+    image['source'] = 'deepfashion'
+    width, height = get_image_size(img['file'])
+    image['width'] = width
+    image['height'] = height
     image['category_class'] = category_images[i]['type']
     image['category_name'] = category_images[i]['name']
     image['texture_class'] = attribute_images[i]['texture_class']
@@ -128,15 +137,16 @@ if __name__ == '__main__':
     image['shape_class'] = attribute_images[i]['shape_class']
     image['part_class'] = attribute_images[i]['part_class']
     image['style_class'] = attribute_images[i]['style_class']
+    image['bbox'] = bboxes[i]
     i = i + 1
 
     try:
       id = dataset_api.add_image(image)
-      url = upload_image_to_storage(id)
+      url = upload_image_to_storage(id, image['file'])
 
       image['_id'] = ObjectId(id)
       image['url'] = url
       dataset_api.update_image(image)
     except Exception as e:
       print(e)
-    print(image)
+    # print(image)
