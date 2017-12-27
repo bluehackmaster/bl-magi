@@ -36,8 +36,8 @@ flags.DEFINE_string('set', 'train', 'Convert training set, validation set or '
 flags.DEFINE_string('annotations_dir', 'Annotations',
                     '(Relative) path to annotations directory.')
 flags.DEFINE_string('folder', 'merged', 'Desired challenge folder.')
-flags.DEFINE_string('output_path', '', 'Path to output TFRecord')
-# flags.DEFINE_string('eval_output_path', '', 'Path to eval output TFRecord')
+flags.DEFINE_string('train_output_path', '', 'Path to train output TFRecord')
+flags.DEFINE_string('eval_output_path', '', 'Path to eval output TFRecord')
 flags.DEFINE_string('label_map_path', 'data/pascal_label_map.pbtxt',
                     'Path to label map proto')
 flags.DEFINE_boolean('ignore_difficult_instances', False, 'Whether to ignore '
@@ -122,31 +122,63 @@ def dict_to_tf_example(data, image_subdirectory='JPEGImages'):
   }))
   return example
 
-
-def main(_):
-  dataset_api = Images()
-  writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
+def read_from_db(dataset_api, category_class):
 
   offset = 0
   limit = 50
+  cut_idx = int(58000*0.8)
+  images = []
 
   while True:
     try:
-      res = dataset_api.get_images_by_source("deepfashion", offset=offset,
-                                             limit=limit)
-      for image in res:
-        tf_data = dict_to_tf_example(image)
-        writer.write(tf_data.SerializeToString())
+      res = dataset_api.get_images_by_category_class(category_class, offset=offset, limit=limit)
+      images.extend(res)
 
       if limit > len(res):
         print("done")
         break
+
       else:
         offset = offset + len(res)
     except Exception as e:
       print(str(e))
 
-  writer.close()
+  random.shuffle(images)
+  train_images = images[0:cut_idx]
+  eval_images = images[cut_idx:-1]
+
+  return (train_images, eval_images)
+
+
+def main(_):
+  dataset_api = Images()
+  train_writer = tf.python_io.TFRecordWriter(FLAGS.train_output_path)
+  eval_writer = tf.python_io.TFRecordWriter(FLAGS.eval_output_path)
+
+  train_images = []
+  eval_images = []
+
+  for i in range(1, 4):
+    category_class = str(i)
+
+    (category_train_images, category_eval_images) = read_from_db(dataset_api,
+                                                                 category_class)
+    train_images.extend(category_train_images)
+    eval_images.extend(category_eval_images)
+
+  random.shuffle(train_images)
+  random.shuffle(eval_images)
+
+  for image in train_images:
+    tf_data = dict_to_tf_example(image)
+    train_writer.write(tf_data.SerializeToString())
+
+  for image in eval_images:
+    tf_data = dict_to_tf_example(image)
+    eval_writer.write(tf_data.SerializeToString())
+
+  train_writer.close()
+  eval_writer.close()
 
 
 if __name__ == '__main__':
