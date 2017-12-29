@@ -32,6 +32,6 @@ current_path = os.getcwd()
 train_input_file = os.path.join(current_path, "train.record")
 test_input_file = os.path.join(current_path, "eval.record")
 
-#read_tfrecord(train_input_file)
-read_tfrecord(test_input_file)
+read_tfrecord(train_input_file)
+#read_tfrecord(test_input_file)
 
