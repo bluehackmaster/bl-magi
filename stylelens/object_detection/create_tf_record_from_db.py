@@ -96,8 +96,8 @@ def dict_to_tf_example(data, image_subdirectory='JPEGImages'):
   ymax.append(float(data['bbox']['y2']) / height)
   classes_text.append(data['category_name'].encode('utf8'))
   classes.append(int(data['category_class']))
-  difficult = int(0)
-  truncated = int(0)
+  difficult = int([0])
+  truncated = int([0])
   poses.append('Frontal'.encode('utf8'))
 
   example = tf.train.Example(features=tf.train.Features(feature={
@@ -145,7 +145,7 @@ def read_from_db(dataset_api, category_class):
 
   random.shuffle(images)
   train_images = images[0:cut_idx]
-  eval_images = images[cut_idx:-1]
+  eval_images = images[cut_idx:58000]
 
   return (train_images, eval_images)
 
