@@ -244,3 +244,4 @@ nohup.out
 *.pbtxt
 *.record
 bin/
+tmp_file.jpg
