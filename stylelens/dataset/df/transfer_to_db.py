@@ -81,7 +81,6 @@ def get_attribute_images(attribute_clothes):
 
     attribute_images.append(attr)
 
-  print('get_attribute_images:start')
   return attribute_images
 
 def get_bbox():
@@ -100,6 +99,8 @@ def get_bbox():
 
 def upload_image_to_storage(id, img_file):
   print("upload_image_to_storage")
+  print("id = " + str(id))
+  print("img_file = " + img_file)
   file = '/dataset/' + img_file
   key = os.path.join('deepfashion', 'img', id + '.jpg')
   is_public = True
@@ -149,4 +150,3 @@ if __name__ == '__main__':
       dataset_api.update_image(image)
     except Exception as e:
       print(e)
-    # print(image)

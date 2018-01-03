@@ -12,8 +12,6 @@ AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY'].replace('"', '')
 AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'].replace('"', '')
 storage = s3.S3(AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
 
-TMP_FILE = 'tmp_file.jpg'
-
 def upload_image_to_storage(file):
   print("upload_image_to_storage")
   key = os.path.join('deepfashion', 'obj', file)
@@ -27,7 +25,7 @@ def get_image_size(img_file):
 
 def crop(image):
   file = image['url']
-
+  new_file_name = str(image['_id']) + '.jpg'
   bbox = image['bbox']
   left = bbox['x1']
   top = bbox['y1']
@@ -39,9 +37,9 @@ def crop(image):
     im = Image.open(f)
     area = (left, top, left + abs(left-right), top + abs(bottom-top))
     cropped = im.crop(area)
-    cropped.save(TMP_FILE)
-    uploaded_path = upload_image_to_storage(TMP_FILE)
-    os.remove(TMP_FILE)
+    cropped.save(new_file_name)
+    uploaded_path = upload_image_to_storage(new_file_name)
+    os.remove(new_file_name)
   except Exception as e:
     print(e)
 

@@ -245,3 +245,5 @@ nohup.out
 *.record
 bin/
 tmp_file.jpg
+stylelens/dataset/df/*.txt
+stylelens/dataset/df/*.sh
