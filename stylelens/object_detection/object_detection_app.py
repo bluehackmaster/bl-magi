@@ -1,15 +1,13 @@
-import os
-import time
 import argparse
-import multiprocessing
-import numpy as np
-import tensorflow as tf
+import os
 
 import PIL.Image as Image
-from utils.app_utils import FPS, WebcamVideoStream
-from multiprocessing import Queue, Pool
+import numpy as np
+import tensorflow as tf
+from utils.app_utils import FPS
+
+from dataset.df import visualization_utils as vis_util
 from object_detection.utils import label_map_util
-from object_detection.utils import visualization_utils as vis_util
 
 CWD_PATH = os.getcwd()
 detection_graph = tf.Graph()
